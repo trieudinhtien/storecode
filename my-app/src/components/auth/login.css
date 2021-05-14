@@ -1,0 +1,51 @@
+.wrapper{
+    background-image: url("../../picture/background.png");
+    background-size: cover;
+    height: 650px;
+    position: relative;
+}
+.childWrap{
+    position: absolute;
+    width: 100%;
+    top: 205px;
+
+}
+
+.col-1{
+    display: flex;
+    justify-content: space-around;
+}
+.col-2{
+    display: flex;
+    justify-content: space-around;
+}
+.wrapper h1{
+    color: #ffffff;
+    font-size: 64px;
+    font-weight: 400;
+    padding-top: 31px;
+    
+}
+.formLogin{
+    width:300px;
+   
+}
+.formLogin #username{
+    margin: 35px 0 25px 0;
+}
+.formLogin input{
+    height: 48px;
+    font-size: 26px;
+}
+
+.btn-submit{
+    width: 100%;
+    margin-top: 42px;
+    height: 48px;
+    font-size: 26px;
+    background-color: #2B47BE;
+    border-radius: 6px;
+}
+.col-1{
+    border-right: 3px solid #ffffff;
+}
