@@ -38,7 +38,7 @@ class todo extends Component {
                 'Content-Type': 'application/json'
                 // 'Content-Type': 'application/x-www-form-urlencoded',
             },
-            body: JSON.stringify({ title: this.state.dataInput })
+            body: JSON.stringify({ title: this.state.dataInput ,status: this.state.statusInput,level: this.state.levelInput })
         }).then(r => this.componentDidMount())
 
         
@@ -111,8 +111,8 @@ class todo extends Component {
                         <label className='sort'>Sort by:&nbsp; </label>
                         <select style={{margin:"0 5px"}}>
                         <option value="status-complete">Complete</option>
-                        <option value="status-fail">Fail</option>
-                        <option value="status-processing">processing</option>
+                        <option value="status-Done">Done</option>
+                        <option value="status-progressing">progressing</option>
                         </select>
                         &nbsp;&nbsp;&nbsp;
 
@@ -161,8 +161,8 @@ class todo extends Component {
                                     <label>Status:&nbsp;</label>
                                     <select name="statusInput" value={statusInput} onChange={this.changeStatusInput}>
                                     <option value="Complete">Complete</option>
-                                    <option value="Fail">Fail</option>
-                                    <option value="processing">processing</option>
+                                    <option value="Done">Done</option>
+                                    <option value="progressing">progressing</option>
                                     </select>
                                     &nbsp;&nbsp;
                                     <label>Priority:&nbsp;</label>
