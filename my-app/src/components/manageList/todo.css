@@ -62,7 +62,7 @@
     background-color: #DDDDDD;
 }
 .sort{
-    margin-left: 50px;
+    margin-left: 70px;
 }
 
 /* muc do  */
@@ -76,10 +76,29 @@
 .status-done{
     background-color: #ECECEC;
 }
-.statuc-progress{
+.status-progress{
     background-color: #C7E8D6;   
 }
 .form-add-new{
     padding: 30px;
+}
+.complete{
+    text-decoration: line-through;
+}
+.btn-add-delete{
+    display: flex;
+    justify-content: space-around;
+}
+.textInput{
+    display: flex;
+    align-items: center;
+}
+.levelInput{
+    margin: 12px 0;
+    display: flex;
+    justify-content: space-between;
+}
+.list-task{
+    margin-top:30px;
 }
 

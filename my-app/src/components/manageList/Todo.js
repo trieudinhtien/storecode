@@ -2,7 +2,7 @@ import './todo.css'
 import React, { Component } from 'react';
 import { Col, Container, Row } from 'reactstrap';
 import { Redirect } from 'react-router';
-
+import { orderBy } from 'lodash';
 class todo extends Component {
     constructor(props){
         super(props)
@@ -19,18 +19,24 @@ class todo extends Component {
             isLoaded: false,
             levelInput: '',
             statusInput: '',
-            loggedIn
+            loggedIn,
+            isComplete: false,
+            orderStatus:'',
+            orderDir: '',
+            isSorted: false,
+            dateTime: '',
         }
     }
-
     componentDidMount(){
         fetch("http://localhost:3000/tasks").then(r => r.json())
         .then(data => this.setState({isLoaded:true, list:data}))
-
-        
     }
+
+    
     AddTask = (e) => {
         e.preventDefault();
+        let time = new Date();
+        this.setState({ dateTime: time.toString() });
         console.log(this.state);
         fetch('http://localhost:3000/tasks' ,{
             method: 'POST',
@@ -38,7 +44,11 @@ class todo extends Component {
                 'Content-Type': 'application/json'
                 // 'Content-Type': 'application/x-www-form-urlencoded',
             },
-            body: JSON.stringify({ title: this.state.dataInput ,status: this.state.statusInput,level: this.state.levelInput })
+            body: JSON.stringify({ 
+                title: this.state.dataInput,
+                status: this.state.statusInput,
+                level: this.state.levelInput
+            })
         }).then(r => this.componentDidMount())
 
         
@@ -49,8 +59,8 @@ class todo extends Component {
         this.setState({[e.target.name] : e.target.value});
     }
     changeStatusInput = (e) => {
-        this.setState({[e.target.name]: e.target.value})
-        console.log(this.state.statusInput);
+        this.setState({[e.target.name]: e.target.value })
+        console.log(e.target.value);
     }
     changeLevelInput =(e) =>{
         this.setState({[e.target.name]: e.target.value})
@@ -74,13 +84,48 @@ class todo extends Component {
     logout = () => {
         localStorage.removeItem("token");
     }
-
+    //clear tasks
     ClearTask = () => {
-        console.log(this.state.list);
+        const list = this.state.list;
+        list.map((item) => {
+            this.removeTask(item.id);
+        })
+        
     }
+    //level- tasks
+    setClass = (data) => {
+        if(data === 'thigh'){
+            return 'level-high';
+        }
+        if(data === 'low'){
+            return 'level-low'
+        }
+        
+    }
+    statusComplete = () => {
+        this.setState({isComplete: !this.state.isComplete});
+        console.log(this.state.isComplete);
+    }
+
+
+    //SORT BY LELVEL
+    handlerSort = () => {
+        this.setState({ isSorted: !this.state.isSorted })
+    }
+    getValueStatus = (e) => {
+        this.setState({ orderStatus: e.target.value});
+        console.log(this.state.orderStatus)
+    }
+    getValueDir = (e) => {
+        this.setState({ orderDir: e.target.value})
+        console.log(this.state.orderDir)
+
+    }
+
+    //Render()
     render() {
 
-        const {dataInput, list , isLoaded, levelInput,statusInput } = this.state;
+        let {dataInput, list , isLoaded, levelInput,statusInput ,orderStatus,orderDir,isSorted,dateTime} = this.state;
         if(this.state.loggedIn === false){
             return <Redirect to="/" />
         }
@@ -90,6 +135,26 @@ class todo extends Component {
                 "start database... "
             )
         }
+
+        let complete = "";
+        if(this.state.isComplete){
+            complete = " complete"
+        }
+        //sort
+        if(isSorted){
+            list = orderBy(list, [orderStatus], [orderDir]);
+        }
+        const todoItem = list.map((data,key) => {
+            return(
+                <div style={{height:"45px"}}>
+                    <li className={this.setClass(data.level)+complete}>
+                        {`${key+1}.  ${data.title} (Priority: ${data.level}, Status: ${data.status})`}
+                        <button className="btn btn-primary" onClick={() => this.removeTask(data.id)}>X</button>
+                    </li>
+                    <br></br>
+                </div>
+            ) 
+        })
         return (
             <div>
                 <Container>
@@ -105,25 +170,24 @@ class todo extends Component {
                             </Col>
                         </Row>
                     </div>
-                    <h3 style={{margin:"10px 0 5px 50px"}}>My Task</h3>
+                    <h3 style={{margin:"10px 0 5px 50px",color:"#7BB3E1",fontWeight:"400"}}>My Task</h3>
                     {/* NAVBAR */}
                     <div className="optionFilter">
                         <label className='sort'>Sort by:&nbsp; </label>
-                        <select style={{margin:"0 5px"}}>
-                        <option value="status-complete">Complete</option>
-                        <option value="status-Done">Done</option>
-                        <option value="status-progressing">progressing</option>
+                        <select onChange={this.getValueStatus} style={{margin:"0 5px"}}>
+                        <option value="status">Status</option>
+                        <option value="level">Priority</option>
                         </select>
                         &nbsp;&nbsp;&nbsp;
 
                         <label for="">Direct on: </label>
-                        <select style={{margin:"0 5px"}}>
-                        <option value="DESC">DESC</option>
-                        <option value="ASC">ASC</option>
+                        <select onChange={this.getValueDir} style={{margin:"0 5px"}}>
+                        <option value="desc">DESC</option>
+                        <option value="asc">ASC</option>
                         </select>
-                        &nbsp;&nbsp;&nbsp;
+                        
 
-                        <label className='filter'>Filter: </label>
+                        <label style={{marginLeft:"100px"}}>Filter: </label>
                         <input style={{margin:"0 5px"}} type="checkbox"></input>
                         &nbsp;&nbsp;&nbsp;
                         <label>From:</label>
@@ -131,53 +195,51 @@ class todo extends Component {
                         <label>To:</label>
                         <input style={{margin:"0 5px"}} type="date" name="to"></input>
                         &nbsp;&nbsp;&nbsp;
-                        <button className='btn btn-primary'>Apply</button>
-                    
-
-
+                        <button onClick={this.handlerSort} style={{marginBottom:"5px"}} className='btn btn-primary'>Apply</button>
                     </div>
                     <div className="body">
                         <Row>
                             <Col style={{borderRight:"1px solid black"}} xs='8'>
                                 <ul className="list-task">
-                                {
-                                list.map(data => (
-                                    <div>
-                                        
-                                            <li className="level-high">{data.id+ "."+ data.title} <button className="btn btn-primary" onClick={() => this.removeTask(data.id)}>Delete</button></li>
-                                            <br></br>
-                                            
-                                        
-                                    </div>
-                                ))}
-                                   
+                                    {todoItem}
                                 </ul>
                             </Col>
                             <Col xs='4'>
                                 <div className="form-add-new">
-                                    <label style={{width:"50px"}}>Task:&nbsp;</label>
-                                    <input style={{width:"228px", marginBottom:"10px"}} type='text' name='dataInput' value={dataInput} onChange={this.handlerChange} placeholder='enter your task here'></input>
-                                    <br></br>
-                                    <label>Status:&nbsp;</label>
-                                    <select name="statusInput" value={statusInput} onChange={this.changeStatusInput}>
-                                    <option value="Complete">Complete</option>
-                                    <option value="Done">Done</option>
-                                    <option value="progressing">progressing</option>
-                                    </select>
-                                    &nbsp;&nbsp;
-                                    <label>Priority:&nbsp;</label>
-                                    <select name="levelInput" value={levelInput} onChange={this.changeLevelInput} >
-                                    <option value="high">High</option>
-                                    <option value="low">Low</option>
-                                    </select>
-                                    <p style={{marginTop:"10px"}}>Created: wed,17/10/1998     By      Tien</p>
+                                    <div className='textInput'>
+                                        <label style={{width:"63px"}}>Task:&nbsp;</label>
+                                        <input style={{flex:"1"}} type='text' name='dataInput' value={dataInput} onChange={this.handlerChange} placeholder='enter your task here'></input>
+                                    </div>
+                                 
+                                    <div className='levelInput'>
+                                        <div>
+                                            <label style={{width:"63px"}}>Status:</label>
+                                            <select name="statusInput" value={statusInput} onChange={this.changeStatusInput}>
+                                            <option value="a-pending">Pending</option>
+                                            <option value="c-done">Done</option>
+                                            <option value="b-progressing">progressing</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div>
+                                            <label>Priority:</label>
+                                            <select name="levelInput" value={levelInput} onChange={this.changeLevelInput} >
+                                            <option value="thigh">High</option>
+                                            <option value="low">Low</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <p>Created: {dateTime}  By      Tien</p>
                                     <br></br>
                                     <br></br>
                                     <br></br>
                                     <br></br>
 
-                                    <button style={{margin:" 0 10px 0 124px"}} className='btn btn-primary' onClick={this.ClearTask}>Clear</button>
-                                    <button className='btn btn-primary' onClick={this.AddTask}>Addnew</button>
+                                    <div className="btn-add-delete">
+                                        <button className='btn btn-primary' onClick={this.ClearTask}>Clear</button>
+                                        <button className='btn btn-primary' onClick={this.AddTask}>Addnew</button>
+                                        <button className="btn btn-primary" >Delete</button>
+                                    </div>
 
 
                                 </div>
