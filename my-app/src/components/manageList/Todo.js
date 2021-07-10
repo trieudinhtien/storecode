@@ -121,11 +121,20 @@ class todo extends Component {
         console.log(this.state.orderDir)
 
     }
+    //deletetask 2
+    deleteTask2 = () =>{
+        const { list } = this.state;
+        list.pop();
+        this.setState({list: list});
+        console.log(list);
+    }
 
     //Render()
     render() {
 
         let {dataInput, list , isLoaded, levelInput,statusInput ,orderStatus,orderDir,isSorted,dateTime} = this.state;
+        console.log(orderStatus);
+        console.log(orderDir);
         if(this.state.loggedIn === false){
             return <Redirect to="/" />
         }
@@ -238,7 +247,7 @@ class todo extends Component {
                                     <div className="btn-add-delete">
                                         <button className='btn btn-primary' onClick={this.ClearTask}>Clear</button>
                                         <button className='btn btn-primary' onClick={this.AddTask}>Addnew</button>
-                                        <button className="btn btn-primary" >Delete</button>
+                                        <button className='btn btn-primary' onClick={this.deleteTask2} >Delete</button>
                                     </div>
 
 
